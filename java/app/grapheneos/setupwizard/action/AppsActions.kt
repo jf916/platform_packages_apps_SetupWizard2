@@ -7,12 +7,12 @@ import app.grapheneos.setupwizard.view.activity.SetupWizardActivity
 
 object AppsActions {
     private const val TAG = "AppsActions"
-    private const val ACTION_APP_INSTALL = "app.grapheneos.apps.MAIN"
+    private const val ACTION_APP_INSTALL = "app.grapheneos.setupwizard.action.APPS"
 
     init {
     }
 
-    fun InstallApps(context: SetupWizardActivity) {
+    fun launchMigration(context: SetupWizardActivity) {
         Log.d(TAG, "launchAppInstaller")
         val intent = Intent(ACTION_APP_INSTALL)
         intent.putExtra("SuW", true)
