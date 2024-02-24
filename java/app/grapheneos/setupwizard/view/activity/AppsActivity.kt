@@ -27,7 +27,7 @@ class AppsActivity : SetupWizardActivity(
 
     override fun setupActions() {
         skip.setOnClickListener { SetupWizard.next(this) }
-        install.setOnClickListener { AppsActions.launchAppsInstaller(this) }
+        install.setOnClickListener { AppsActions.InstallApps(this) }
     }
 
     override fun onActivityResult(resultCode: Int, data: Intent?) {
