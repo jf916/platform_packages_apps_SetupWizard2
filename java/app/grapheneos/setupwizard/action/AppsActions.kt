@@ -1,21 +1,28 @@
 package app.grapheneos.setupwizard.action
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
 import android.util.Log
+import androidx.core.app.ActivityCompat.startActivityForResult
 import app.grapheneos.setupwizard.view.activity.SetupWizardActivity
 
 object AppsActions {
     private const val TAG = "AppsActions"
-    private const val ACTION_APP_INSTALL = "app.grapheneos.apps.MAIN"
 
     init {
     }
 
     fun launchAppsInstaller(context: SetupWizardActivity) {
         Log.d(TAG, "launchAppInstaller")
-        val intent = Intent(ACTION_APP_INSTALL)
-        intent.putExtra("app.grapheneos.apps.EXTRA_SUW", true)
+        val intent = Intent(Intent.ACTION_MAIN)
+        val packageName = "app.grapheneos.apps";
+        intent.setComponent(
+            ComponentName(
+                packageName,
+                "$packageName.ui.MainActivity"
+            )
+        )
         SetupWizard.startActivityForResult(context, intent)
     }
 
