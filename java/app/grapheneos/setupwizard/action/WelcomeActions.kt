@@ -2,7 +2,12 @@ package app.grapheneos.setupwizard.action
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
+import android.os.Build
+import android.os.PowerManager
+import android.service.oemlock.OemLockManager
+import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.ArrayAdapter
@@ -10,6 +15,7 @@ import app.grapheneos.setupwizard.APPLY_SIM_LANGUAGE_ON_ENTRY
 import app.grapheneos.setupwizard.R
 import app.grapheneos.setupwizard.appContext
 import app.grapheneos.setupwizard.data.WelcomeData
+import app.grapheneos.setupwizard.view.activity.OemUnlockActivity
 import com.android.internal.app.LocalePicker
 import com.android.internal.app.LocalePicker.LocaleInfo
 import com.google.android.setupcompat.util.SystemBarHelper
@@ -18,11 +24,12 @@ import java.util.Locale
 object WelcomeActions {
     private const val TAG = "WelcomeActions"
     private const val ACTION_ACCESSIBILITY = "android.settings.ACCESSIBILITY_SETTINGS_FOR_SUW"
-    private const val ACTION_EMERGENCY = "com.android.phone.EmergencyDialer.DIAL"
+    private const val REBOOT_REASON_BOOTLOADER = "bootloader"
     private var simLocaleApplied = false
 
     init {
         refreshCurrentLocale()
+        refreshOemUnlockStatus()
         Log.d(TAG, "init: currentLocale = ${WelcomeData.selectedLanguage}")
     }
 
@@ -66,7 +73,11 @@ object WelcomeActions {
     }
 
     fun emergencyCall(context: Activity) {
-        SetupWizard.startActivity(context, Intent(ACTION_EMERGENCY))
+        SetupWizard.startActivity(
+            context,
+            appContext.getSystemService(TelecomManager::class.java)!!
+                .createLaunchEmergencyDialerIntent(null)
+        )
     }
 
     private fun getSimLocale(): Locale? {
@@ -88,5 +99,41 @@ object WelcomeActions {
         }
         if (localeInfo != null) adapter.insert(localeInfo, 0)
         return adapter
+    }
+
+    private fun disableOemUnlockByUser() {
+        getOemLockManager()?.isOemUnlockAllowedByUser = false
+        refreshOemUnlockStatus()
+    }
+
+    private fun getOemLockManager(): OemLockManager? {
+        return appContext.getSystemService(OemLockManager::class.java)
+    }
+
+    fun rebootToBootloader() {
+        appContext.getSystemService(PowerManager::class.java)!!.reboot(REBOOT_REASON_BOOTLOADER)
+    }
+
+    fun next(activity: Activity) {
+        if (Build.isDebuggable()) {
+            // we allow free pass for development features on debug builds of the OS
+            SetupWizard.next(activity)
+            return
+        }
+        if (SetupWizard.isSecondaryUser) {
+            // secondary users should not be bothered for this
+            // the device setup (primary user setup) is already done at this point
+            SetupWizard.next(activity)
+            return
+        }
+        if (WelcomeData.oemUnlocked.value == true) {
+            SetupWizard.startActivity(activity, OemUnlockActivity::class.java)
+        } else {
+            SetupWizard.next(activity)
+        }
+    }
+
+    private fun refreshOemUnlockStatus() {
+        WelcomeData.oemUnlocked.value = getOemLockManager()?.isDeviceOemUnlocked ?: false
     }
 }
