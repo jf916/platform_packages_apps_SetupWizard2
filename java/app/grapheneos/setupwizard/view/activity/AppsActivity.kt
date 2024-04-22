@@ -17,17 +17,13 @@ class AppsActivity : SetupWizardActivity(
         private const val TAG = "AppsActivity"
     }
 
-    private lateinit var skip: View
-    private lateinit var install: View
-
     override fun bindViews() {
-        skip = findViewById(R.id.skip)
-        install = findViewById(R.id.install)
+        primaryButton.setText(this, R.string.install)
     }
 
     override fun setupActions() {
-        skip.setOnClickListener { SetupWizard.next(this) }
-        install.setOnClickListener { AppsActions.launchAppsInstaller(this) }
+        secondaryButton.setOnClickListener { SetupWizard.next(this) }
+        primaryButton.setOnClickListener { AppsActions.launchAppsInstaller(this) }
     }
 
     override fun onActivityResult(resultCode: Int, data: Intent?) {

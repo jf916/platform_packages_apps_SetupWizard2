@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.util.Log
-import androidx.core.app.ActivityCompat.startActivityForResult
 import app.grapheneos.setupwizard.view.activity.SetupWizardActivity
 
 object AppsActions {
